@@ -74,11 +74,6 @@ public class SovService {
                         wg.get(vi).negate();
                     }
                 }
-            } else if (wg.mw(i, "never")) { //|nor|neither
-                int j = indexOfVerb(wg, i + 1);
-                if (j != -1) {
-                    wg.get(j).negate();
-                }
             }
         }
     }
@@ -223,22 +218,34 @@ public class SovService {
     }
 
     private void reorderCombinations(WordGroup wg, int start, int end) {
-        int c = wg.findWord("and|or|but", start, end);
-        if (c != -1) {
-            int p1 = wg.findTag("NNP?S?", start, c);
-            int p2 = wg.findTag("NNP?S?", c + 1, end);
-            if (p1 != -1 && p2 != -1) {
-                reorderCombinations2(wg, start, c);
-                reorderCombinations2(wg, c + 1, end);
-            } else {
-                reorderCombinations2(wg, start, end);
+        int i = end;
+        while (i > start && !wg.get(i).matcht("NNP?S?")) {
+            i--;
+        }
+        if (i > start) {
+            int j = i - 1;
+            if (wg.get(j).matcht("JJR?")) {
+                List<ExtWord> reversed = new ArrayList();
+                reversed.add(wg.remove(i));
+                while (j > start && (wg.get(j).matcht("JJR?|RB") || wg.get(j).matchw("and"))) {
+                    reversed.add(wg.remove(j--));
+                }
+                for (int k = 0; k < reversed.size(); k++) {
+                    if (reversed.get(k).eqt("RB") && reversed.get(k - 1).matcht("JJR?")) {
+                        reversed.add(k - 1, reversed.remove(k));
+                    }
+                }
+                wg.addAll(j + 1, reversed);
             }
-        } else {
-            reorderCombinations2(wg, start, end);
+        }
+        for (int j = start; j <= end; j++) {
+            if (wg.get(j).eqw("o'clock") && wg.get(j-1).eqt("CD")) {
+                wg.add(j - 1, wg.remove(j));
+            }
         }
     }
 
-    private void reorderCombinations2(WordGroup wg, int start, int end) {
+    private void reorderCombinationsBak(WordGroup wg, int start, int end) {
 
         int i = end;
         while (i > start) {
@@ -247,8 +254,8 @@ public class SovService {
                 if (wg.get(j).isDisabled()) {
                     j--;
                 }
-                boolean b = wg.get(j).matcht("NNP?S?(_POS)?") || wg.get(j).matcht("CD") || (wg.get(j).matcht("JJR?") && !wg.get(j).matchw("many|multiple|whole|such|several|few|a few"));
-                while (b && j > start && !"adv".equals(wg.get(i).partOfSentence()) 
+                boolean b = wg.get(j).matcht("NNP?S?(_POS)?") || wg.get(j).matcht("CD") || (wg.get(j).matcht("JJR?") && !wg.get(j).matchw("many|multiple|whole|such|several|some|few|a few"));
+                while (b && j > start && !"adv".equals(wg.get(i).partOfSentence())
                         && (wg.get(j - 1).isDisabled() || wg.get(j - 1).matcht("RB|NNP?S?|POS|NNP?_POS") || (wg.get(j - 1).matcht("JJR?") && !wg.get(j - 1).matchw("many|several|a number of")) || wg.mw(j - 1, "and|but"))) {
                     j--;
                 }
@@ -363,7 +370,7 @@ public class SovService {
         while (last > 0 && (l.get(last).matcht(".|,|-RRB-") || l.get(last).isPlaceHolder() || l.get(last).matchw("then"))) {
             last--;
         }
-        if (l.get(last+1).isPlaceHolder() && l.get(last).eqw("by")) { // 𝑯𝒆 𝒗𝒆𝒏𝒕𝒆𝒅 𝒉𝒊𝒔 𝒂𝒏𝒈𝒆𝒓 𝒃𝒚 𝒌𝒊𝒄𝒌𝒊𝒏𝒈 𝒕𝒉𝒆 𝒅𝒐𝒐𝒓.
+        if (l.get(last + 1).isPlaceHolder() && l.get(last).eqw("by")) { // 𝑯𝒆 𝒗𝒆𝒏𝒕𝒆𝒅 𝒉𝒊𝒔 𝒂𝒏𝒈𝒆𝒓 𝒃𝒚 𝒌𝒊𝒄𝒌𝒊𝒏𝒈 𝒕𝒉𝒆 𝒅𝒐𝒐𝒓.
             last++;
         }
         if (last == -1) {
@@ -445,7 +452,7 @@ public class SovService {
                 moveToEnd(s, wg);
             }
         }
-*/
+         */
         if (sov.length() == 2) {
             if (sov.get(0).isVerb()) {
                 if (sov.get(1).eqw("that")) {

@@ -694,10 +694,14 @@ public class PersianInflector {
         }
 
         if (voice == Voice.Active) {
-            if (negative) {
-                ret = "ن" + ret;
-            }
-            if (!parts[0].isBlank()) {
+            if (parts[0].isBlank()) {
+                if (negative) {
+                    ret = "ن" + ret;
+                }
+            } else {
+                if (negative) {
+                    ret += " ن";
+                }
                 ret += parts[1] + "ه‌";
             }
         } else {
@@ -808,16 +812,17 @@ public class PersianInflector {
         boolean hasModal = clause.getIdxModal() != -1;
         boolean hasNeed = clause.getIdxNeed() != -1;
 
-//         ret = negative ? parts[0].isBlank() ? "ن" : "" : "";
         String ret = buildObjectName(parts, idxGozashte);
-//        if (negative && !parts[0].isBlank()) {
-//            ret += " ن";
-//        }
+
         if (voice == Voice.Active) {
-            if (negative) {
-                ret = "ن" + ret;
-            }
-            if (!parts[0].isBlank()) {
+            if (parts[0].isBlank()) {
+                if (negative) {
+                    ret = "ن" + ret;
+                }
+            } else {
+                if (negative) {
+                    ret += " ن";
+                }
                 ret += parts[1] + "ه‌";
             }
         } else {
