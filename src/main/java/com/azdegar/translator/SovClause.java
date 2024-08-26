@@ -21,6 +21,8 @@ import lombok.Setter;
 @Setter
 public final class SovClause extends Clause {
 
+    private int idxMovedVerb;
+
     public SovClause(WordGroup init, boolean dependent) {
         words = init;
         tense = Tense.NONE;
@@ -153,6 +155,13 @@ public final class SovClause extends Clause {
             } else {
                 closing.setTranslation(c.word());
             }
+        }
+    }
+
+    public void add(int index, ExtWord word) {
+        words.add(index, word);
+        if (index < idxMovedVerb) {
+            idxMovedVerb++;
         }
     }
 

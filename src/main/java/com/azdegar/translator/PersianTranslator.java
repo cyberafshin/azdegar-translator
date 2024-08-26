@@ -502,6 +502,12 @@ public class PersianTranslator {
                     word.setTranslation(ts.stream().collect(Collectors.joining("-")));
                 }
             }
+            if (word.eqt("JJ") && sov.get(i - 1).eqw("most")) {
+                if (word.getTranslation() != null && !word.translation().isBlank()) {
+                    word.setTranslation(word.getTranslation() + "ترین");
+                    sov.get(i - 1).disable();
+                }
+            }
             if (word.translation() == null || word.translation().equals(word.word())) {
                 if (word.word().endsWith("er")) {
                     int j = word.word().lastIndexOf("er");

@@ -115,13 +115,11 @@ public class SovService {
             }
         }
 
-        if (wg.get(0).eql("what")) {
+        if (wg.get(0).eql("what") && sov.endsWith("?")) {
             if (wg.get(1).eql("be")) {
-                wg.get(0).merge(wg.get(1));
-                wg.get(0).setTag(wg.get(1).tag());
-                wg.get(0).setLemma(wg.get(1).lemma());
-                wg.get(1).disable();
-                sov.setIdxVerb(0);
+                wg.get(0).setTranslation("چه");
+                sov.add(sov.getIdxMovedVerb(), new ExtWord(wg.get(0)));
+                wg.get(0).disable();
                 sov.setType(SentenceType.Interrogative);
             } else if (wg.get(1).lemma().equals("do")) {
                 sov.setType(SentenceType.Interrogative);
@@ -239,7 +237,7 @@ public class SovService {
             }
         }
         for (int j = start; j <= end; j++) {
-            if (wg.get(j).eqw("o'clock") && wg.get(j-1).eqt("CD")) {
+            if (wg.get(j).eqw("o'clock") && wg.get(j - 1).eqt("CD")) {
                 wg.add(j - 1, wg.remove(j));
             }
         }
@@ -367,10 +365,10 @@ public class SovService {
             return 0;
         }
         int last = l.size() - 1;
-        while (last > 0 && (l.get(last).matcht(".|,|-RRB-") || l.get(last).isPlaceHolder() || l.get(last).matchw("then"))) {
+        while (last > 0 && (l.get(last).matcht(".|,|-RRB-") || l.get(last).isPlaceHolder() || l.get(last).matchw("then|to"))) {
             last--;
         }
-        if (l.get(last + 1).isPlaceHolder() && l.get(last).eqw("by")) { // 𝑯𝒆 𝒗𝒆𝒏𝒕𝒆𝒅 𝒉𝒊𝒔 𝒂𝒏𝒈𝒆𝒓 𝒃𝒚 𝒌𝒊𝒄𝒌𝒊𝒏𝒈 𝒕𝒉𝒆 𝒅𝒐𝒐𝒓.
+        if (l.get(last + 1).isPlaceHolder() && l.get(last).matchw("by")) { // 𝑯𝒆 𝒗𝒆𝒏𝒕𝒆𝒅 𝒉𝒊𝒔 𝒂𝒏𝒈𝒆𝒓 𝒃𝒚 𝒌𝒊𝒄𝒌𝒊𝒏𝒈 𝒕𝒉𝒆 𝒅𝒐𝒐𝒓.
             last++;
         }
         if (last == -1) {
@@ -401,7 +399,8 @@ public class SovService {
                 }
             }
             l.get(idx).disable();
-            l.add(last + 1, copy);
+            last++;
+            l.add(last, copy);
         }
         return last;
     }
@@ -463,7 +462,8 @@ public class SovService {
         }
 
         if (!sov.getVerb().eqt("INF") && !sov.getVerb().word().equals("See") && !sov.getVerb().matchl("want")) {
-            copyToEnd(sov.getIdxVerb(), wg);
+            int i = copyToEnd(sov.getIdxVerb(), wg);
+            sov.setIdxMovedVerb(i);
         }
 
         move_TOO(sov);
