@@ -202,7 +202,7 @@ public class SovService {
             reorderCombinations(wg, 0, sov.getIdxVerb() - 1);
             reorderCombinations(wg, sov.getIdxVerb() + 1, wg.size());
         } else {
-            reorderCombinations(wg, 0, wg.size());
+            reorderCombinations(wg, 0, wg.size() - 1);
         }
 
         if (logs != null) {
@@ -222,10 +222,10 @@ public class SovService {
         }
         if (i > start) {
             int j = i - 1;
-            if (wg.get(j).matcht("JJR?")) {
+            if (wg.get(j).matcht("JJR?|NNS?")) {
                 List<ExtWord> reversed = new ArrayList();
                 reversed.add(wg.remove(i));
-                while (j > start && (wg.get(j).matcht("JJR?|RB") || wg.get(j).matchw("and"))) {
+                while (j >= start && (wg.get(j).matcht("JJR?|RB|NNS?") || wg.get(j).matchw("and"))) {
                     reversed.add(wg.remove(j--));
                 }
                 for (int k = 0; k < reversed.size(); k++) {
@@ -239,58 +239,10 @@ public class SovService {
         for (int j = start; j <= end; j++) {
             if (wg.get(j).eqw("o'clock") && wg.get(j - 1).eqt("CD")) {
                 wg.add(j - 1, wg.remove(j));
+            } else if (wg.get(j).matcht("NNP?_POS") && wg.get(j + 2).matcht("NNS?")) {
+                wg.add(j, wg.remove(j + 2));
+                j += 2;
             }
-        }
-    }
-
-    private void reorderCombinationsBak(WordGroup wg, int start, int end) {
-
-        int i = end;
-        while (i > start) {
-            if (wg.get(i).matcht("NNP?S?") && !"adv".equals(wg.get(i).partOfSentence())) {
-                int j = i - 1;
-                if (wg.get(j).isDisabled()) {
-                    j--;
-                }
-                boolean b = wg.get(j).matcht("NNP?S?(_POS)?") || wg.get(j).matcht("CD") || (wg.get(j).matcht("JJR?") && !wg.get(j).matchw("many|multiple|whole|such|several|some|few|a few"));
-                while (b && j > start && !"adv".equals(wg.get(i).partOfSentence())
-                        && (wg.get(j - 1).isDisabled() || wg.get(j - 1).matcht("RB|NNP?S?|POS|NNP?_POS") || (wg.get(j - 1).matcht("JJR?") && !wg.get(j - 1).matchw("many|several|a number of")) || wg.mw(j - 1, "and|but"))) {
-                    j--;
-                }
-                if (b) {
-                    if (wg.mw(j, "and|but")) {
-                        j++;
-                    }
-                    List<ExtWord> l = wg.subList(j, i);
-                    List<ExtWord> reversed = new ArrayList();
-                    int k = l.size() - 1;
-                    while (k >= 0) {
-                        reversed.add(l.get(k));
-                        k--;
-                        if (k >= 0 && l.get(k).eqt("RB")) {
-                            reversed.add(reversed.size() - 1, l.get(k));
-                            k--;
-                        }
-                    }
-                    if (wg.get(i).getBrackets() != null && wg.get(i).getBrackets() != -1) {
-                        reversed.get(reversed.size() - 1).setBrackets(wg.get(i).getBrackets());
-                        wg.get(i).setBrackets(-1);
-                    }
-
-                    wg.addAll(i + 1, reversed);
-                    for (k = 0; k < i - j; k++) {
-                        wg.remove(j);
-                    }
-                    i = j;
-                }
-            }
-            if (wg.get(i).word().equalsIgnoreCase("o'clock")) {
-                if (wg.get(i - 1).eqt("CD")) {
-                    wg.add(i - 1, wg.remove(i));
-                    i--;
-                }
-            }
-            i--;
         }
     }
 

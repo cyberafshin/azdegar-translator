@@ -311,7 +311,7 @@ public class PersianTranslator {
     }
 
     private void changeToPlural(ExtWord word, ExtWord prev, ExtWord next) {
-        if (word.matchw("people") || prev.matchw("several|few|a few|no") || prev.eqt("CD")) {
+        if (word.matchw("people|police") || prev.matchw("several|few|a few|no") || prev.eqt("CD")) {
             return;
         }
         if (word.translation().endsWith("ها") || word.translation().contains("ها ") || word.translation().contains("های ")) {
