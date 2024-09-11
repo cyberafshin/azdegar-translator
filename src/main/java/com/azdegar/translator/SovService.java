@@ -199,10 +199,10 @@ public class SovService {
 //            }
 //        }
         if (sov.getIdxVerb() != -1) {
-            reorderCombinations(wg, 0, sov.getIdxVerb() - 1);
-            reorderCombinations(wg, sov.getIdxVerb() + 1, wg.size());
+            reorder(wg, 0, sov.getIdxVerb() - 1);
+            reorder(wg, sov.getIdxVerb() + 1, wg.size() - 1);
         } else {
-            reorderCombinations(wg, 0, wg.size() - 1);
+            reorder(wg, 0, wg.size() - 1);
         }
 
         if (logs != null) {
@@ -213,6 +213,41 @@ public class SovService {
             }
         }
         return sov;
+    }
+
+    private void reorder(WordGroup wg, int start, int end) {
+        int e = end;
+        while (e > start) {
+            while (e > start && !wg.get(e).matcht("NNP?S?")) {
+                e--;
+            }
+            boolean stop = false;
+            int s = e - 1;
+            while (s >= start) {
+                if (wg.get(s).matcht("JJR?|,")) {
+                    stop = true;
+                } else if (wg.get(s).matcht("NNS?") && stop) {
+                    if (e - s > 1) {
+                        reorderCombinations(wg, s, e);
+                    }
+                    stop = false;
+                    e = s;
+                } else if (wg.get(s).matchw("and")) {
+                    stop = wg.get(s - 1).matcht("NNS?") && wg.get(s + 1).matcht("JJR?");
+                    if (stop) {
+                        reorderCombinations(wg, s + 1, e);
+                        stop = false;
+                        e = s - 1;
+                    }
+                }
+                s--;
+            }
+            if (e - s > 1) {
+                reorderCombinations(wg, s, e);
+                e = s;
+            }
+            e--;
+        }
     }
 
     private void reorderCombinations(WordGroup wg, int start, int end) {
@@ -240,7 +275,11 @@ public class SovService {
             if (wg.get(j).eqw("o'clock") && wg.get(j - 1).eqt("CD")) {
                 wg.add(j - 1, wg.remove(j));
             } else if (wg.get(j).matcht("NNP?_POS") && wg.get(j + 2).matcht("NNS?")) {
-                wg.add(j, wg.remove(j + 2));
+                if (wg.get(j - 1).matcht("DT")) { // This week's newsletter
+                    wg.add(j - 1, wg.remove(j + 2));
+                } else {
+                    wg.add(j, wg.remove(j + 2));
+                }
                 j += 2;
             }
         }

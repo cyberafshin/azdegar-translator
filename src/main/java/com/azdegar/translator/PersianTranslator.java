@@ -329,6 +329,8 @@ public class PersianTranslator {
                 i = t.parsi().indexOf("/");
                 if (i != -1) {
                     t.setParsi(t.parsi().substring(i + 1));
+                } else {
+                    t.setParsi(t.parsi() + "‌ها");
                 }
                 if (t.farsi() != null && !t.farsi().isBlank()) {
                     i = t.farsi().indexOf("/");
@@ -728,7 +730,7 @@ public class PersianTranslator {
         }
 
         int distance = 1;
-        while (distance < 4) {
+        while (distance < 5) {
             int index = word.index() + distance;
             if (index < adjacents.size()) {
                 for (Translation meaning : meanings) {
@@ -741,7 +743,7 @@ public class PersianTranslator {
                     }
                 }
             } else {
-                distance = 4;
+                distance = 5;
             }
             distance++;
         }
